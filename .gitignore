@@ -31,3 +31,6 @@ build/
 
 ### VS Code ###
 .vscode/
+
+# 新增：不提交数据库密码配置
+src/main/resources/application.properties

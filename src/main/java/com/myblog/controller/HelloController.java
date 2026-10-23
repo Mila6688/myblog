@@ -1,51 +1,48 @@
 package com.myblog.controller;
 import com.myblog.model.BlogProfile;
+import com.myblog.model.MessageRequest;
 import com.myblog.model.PersonalProfile;
-import com.myblog.model.MeResponse;
-import com.myblog.model.Status;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RestController;
-import java.time.LocalDateTime;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.ArrayList;
+import java.util.List;
+
 @RestController
 public class HelloController {
-    @GetMapping("/hello")
-    public String hello() {
-        return "Hello, I Exist.";
-    }
 
-    @GetMapping("/time")
-    public String time() {
-        return "Server time: " + LocalDateTime.now().toString();
+    private final List<MessageRequest> messages = new ArrayList<>();
+
+    @GetMapping("/hello")
+    public String hello()
+    {
+        return "Hello, I Exist!";
     }
 
     @GetMapping("/me")
-    public MeResponse me(){
-        MeResponse meResponse = new MeResponse();
-        meResponse.name = "MyBlog";
-        meResponse.owner = "Mila";
-        meResponse.hobby = "walking";
-        meResponse.vision = "Build my digital self";
-        meResponse.food = "tomato";
-        return meResponse;
+    public String me() {
+        return "My name is MyBlog";
+    }
+
+    @GetMapping("/profile1")
+    public BlogProfile profile() {
+        BlogProfile blogProfile = new BlogProfile();
+        blogProfile.name = "MyBlog";
+        blogProfile.owner = "Your Name";
+        blogProfile.message = "Nice to meet you.";
+        return blogProfile;
     }
 
     @GetMapping("/profile")
-    public PersonalProfile profile() {
-        PersonalProfile profile = new PersonalProfile();
-        profile.blogName = "MyBlog";
-        profile.owner = "Mila";
-        profile.introduction = "Nice to meet you.";
-        profile.interests = "walking";
-        profile.vision = "vision1";
-        return profile;
-    }
-    @GetMapping("/status")
-    public Status status(){
-        Status status = new Status();
-        status.status = "alive";
-        status.week = 2;
-        status.ability = "I can speak.";
-        return status;
-    }
-}
+    public PersonalProfile personalProfile() {
+        PersonalProfile p = new PersonalProfile();
+        p.blogName ="Hong's Blog";
+        p.owner = "Ruiling Hong";
+        p.introduction = "Welcome to Web Programming";
+        p.interests = " Soccer ";
+        p.vision = "welcome to AI era";
 
+        return p;
+    }
+
+
+}
