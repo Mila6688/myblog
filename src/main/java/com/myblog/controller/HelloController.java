@@ -1,4 +1,5 @@
 package com.myblog.controller;
+import com.myblog.model.BlogMe;
 import com.myblog.model.BlogProfile;
 import com.myblog.model.MessageRequest;
 import com.myblog.model.PersonalProfile;
@@ -15,12 +16,15 @@ public class HelloController {
     @GetMapping("/hello")
     public String hello()
     {
-        return "Hello, I Exist!";
+        return "Hello, I Exist! I am Mila";
     }
 
     @GetMapping("/me")
-    public String me() {
-        return "My name is MyBlog";
+    public BlogMe me(){
+        BlogMe blogMe = new BlogMe();
+        blogMe.name = "Mila";
+        blogMe.age = 19;
+        return blogMe;
     }
 
     @GetMapping("/profile1")
@@ -35,11 +39,11 @@ public class HelloController {
     @GetMapping("/profile")
     public PersonalProfile personalProfile() {
         PersonalProfile p = new PersonalProfile();
-        p.blogName ="Hong's Blog";
-        p.owner = "Ruiling Hong";
-        p.introduction = "Welcome to Web Programming";
-        p.interests = " Soccer ";
-        p.vision = "welcome to AI era";
+        p.blogName ="Mila's Blog";
+        p.owner = "Minlin Liu";
+        p.introduction = "Good today!";
+        p.interests = " walking ";
+        p.vision = "simple";
 
         return p;
     }

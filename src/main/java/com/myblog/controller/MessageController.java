@@ -1,26 +1,26 @@
 package com.myblog.controller;
 
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.myblog.dto.PageResult;
 import com.myblog.model.Message;
-import com.myblog.model.MessageRequest;
 import com.myblog.service.MessageService;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.util.ArrayList;
-import java.util.List;
-
-
 /**
- * The front desk: only HTTP concerns (paths, methods, JSON, status codes).
- * NO storage code, NO business rules — everything is delegated to Service.
+ * 留言前台(只做接待:收参数 → 喊 Service → 返回结果)
+ * 一行 SQL 都不出现 —— Week05 立下的规矩,Week07 继续遵守。
  */
 @RestController
+@RequestMapping("/messages")
 public class MessageController {
 
     private final MessageService messageService;
@@ -30,53 +30,43 @@ public class MessageController {
     }
 
     /**
-     * Create a message. POST is mandatory — browsers can only send GET.
+     * 创建留言
+     * POST /messages   body: {"content": "..."}
+     * 返回 201 + 带 id 和 createdAt 的完整对象
      */
-    @PostMapping("/messages")
-    public Message create(@RequestBody MessageRequest request) {
-        return messageService.create(request);
+    @PostMapping
+    @ResponseStatus(HttpStatus.CREATED)
+    public Message create(@RequestBody Message message) {
+        return messageService.create(message);
     }
 
     /**
-     * List all messages, with optional keyword filtering.
-     * ONE method, TWO behaviors (no Ambiguous mapping!):
-     *   GET /messages                -> keyword == null -> return all
-     *   GET /messages?keyword=hello  -> filtered list
-     * required = false is the soul: it allows the parameter to be absent.
+     * 搜索 + 分页
+     * GET /messages                       → 默认第 1 窗、每窗 5 条
+     * GET /messages?keyword=hello         → 含 hello 的第 1 窗
+     * GET /messages?keyword=hello&page=2&size=2 → 过滤 + 翻页
+     *
+     * 返回统一瘦身载荷:{ items, total, page, size }
+     * 查不到返回 items:[] 的"诚实空",不报错。
      */
-    @GetMapping("/messages")
-    public List<Message> list(@RequestParam(name = "keyword", required = false) String keyword){
-        List<Message> all = messageService.list();
-
-        // No parameter: return everything as-is
-        if (keyword == null) {
-            return all;
-        }
-
-        // With keyword: loop through and keep only matching messages
-        List<Message> result = new ArrayList<>();
-        for (int i = 0; i < all.size(); i++) {
-            Message m = all.get(i);
-            System.out.println("msg content="+m.getContent()+", keyword="+keyword);
-            if (m.getContent().contains(keyword)) {
-                result.add(m);
-            }
-        }
-        return result;
+    @GetMapping
+    public PageResult<Message> list(
+            @RequestParam(required = false) String keyword,
+            @RequestParam(defaultValue = "1") long page,
+            @RequestParam(defaultValue = "5") long size) {
+        Page<Message> result = messageService.search(keyword, page, size);
+        return PageResult.of(result);
     }
 
     /**
-     * Get one message by id.
-     * The path is /messages/{id} — a DIFFERENT route pattern from
-     * /messages, so it coexists with the list endpoint without conflict.
+     * 查询单条
+     * GET /messages/1   → 200 + 对象
+     * GET /messages/999 → 404 "message not found"(不撒谎)
      */
-    @GetMapping("/messages/{id}")
+    @GetMapping("/{id}")
     public Message getOne(@PathVariable Long id) {
-        // Unbox the Optional honestly: found -> return it;
-        // empty box -> 404, not a NullPointerException.
-        return messageService.findById(id)
+        return messageService.getById(id)
                 .orElseThrow(() -> new ResponseStatusException(
-                        HttpStatus.NOT_FOUND,
-                        "message not found: id=" + id));
+                        HttpStatus.NOT_FOUND, "message not found"));
     }
 }
